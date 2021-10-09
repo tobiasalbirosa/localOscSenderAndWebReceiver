@@ -1,0 +1,96 @@
+<html  onclick="touchStarted()" >
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.js" integrity="sha512-U2sgwrFhl+Tgx9iGH9h5Ba2WyIjyCes+D0prtIFw3a0V+/fkaeL5Cd/VjyPHno9kUPE1rnNhBGTyvtZsfJp0xg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js" integrity="sha512-WzkwpdWEMAY/W8WvP9KS2/VI6zkgejR4/KTxTl4qHx0utqeyVE0JY+S1DlMuxDChC7x0oXtk/ESji6a0lP/Tdg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"> 
+<link rel="stylesheet" type="text/css" href="public/styles/style.css"/>
+<script src="/public/scripts/sketch.js"></script>
+<body style="margin : 0"  oncontextmenu="return false"> 
+    <div style="display : none">
+        <div id="valor0">0.0</div>
+        <div id="valor1">0.0</div>
+        <div id="valor2">0.0</div>
+        <div id="valor3">0.0</div>
+        <div id="valor4">0.0</div>
+        <div id="valor5">0.0</div>
+        <div id="valor6">0.0</div>
+        <div id="valor7">0.0</div>
+    </div>
+</body>
+</html>
+
+<script>
+  var audioCtx = new AudioContext()
+  audioCtx.resume().then(function(res) {
+    console.log("Resuming audio",res)
+  }).catch(function (err) 
+  {
+    console.log(err)
+  })
+function touchStarted() {
+    if(audioCtx.state === 'running') {
+    audioCtx.suspend().then(function() {
+    });
+  } else if(audioCtx.state === 'suspended') {
+    audioCtx.resume().then(function() {
+
+    });
+  }
+}
+document.onkeydown = function(e) {
+  if(event.keyCode == 123) {
+     return false;
+  }
+  if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+     return false;
+  }
+  if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) {
+     return false;
+  }
+  if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+     return false;
+  }
+  if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+     return false;
+  }
+}
+    window.addEventListener("orientationchange", function () {
+  location.reload()
+}, false)
+
+var t=0,resizing=false;
+    function _reload()
+    {
+       location.reload()
+    }
+    window.addEventListener('resize',function(){
+      if(resizing){
+        resizing=true;
+        t=setTimeout(_reload, 250);
+      }
+      resizing = true
+    }, false) 
+
+    var socket = io('https://192.168.0.13:443', { transports: ['websocket'] })
+    //var socket = io('https://oscweb.herokuapp.com', { transports: ['websocket'] })
+    const listeners = socket.listenersAny()
+    let lastValue;
+    socket.on('message', message => {
+        var json = message['args']
+        if (json != undefined) {
+            json = json[0].split('/')
+            json.forEach((value, i) => {
+                let ID = "valor"+i
+                if(value > 0.001){
+                    document.getElementById(ID).innerHTML = value
+                }else {
+                document.getElementById(ID).innerHTML = 0
+                }
+
+            })
+        }
+    })
+</script>
